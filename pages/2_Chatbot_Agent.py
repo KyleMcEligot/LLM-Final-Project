@@ -13,6 +13,9 @@ from langchain.tools import PythonREPLTool
 
 from langchain.utilities import ArxivAPIWrapper
 
+from langchain.tools import WikipediaQueryRun
+from langchain.utilities import WikipediaAPIWrapper
+
 st.set_page_config(page_title="ChatWeb", page_icon="🌐")
 st.header('Chatbot with Web Browser Access')
 st.write('Equipped with internet agent, enables users to ask questions about recent events')
@@ -27,14 +30,19 @@ class ChatbotTools:
     def setup_agent(self):
         # Define tool
         ddg_search = DuckDuckGoSearchRun()
-
+        wiki_agent = WikipediaQueryRun(api_wrapper = WikipediaAPIWrapper())
         tools = [
             Tool(
                 name="DuckDuckGoSearch",
                 func=ddg_search.run,
                 description="Useful for when you need to answer questions about current events. You should ask targeted questions",
-            )]
-
+            ),
+            Tool(
+                name="Wikipedia",
+                func=wiki_agent.run,
+                description="Useful for when you need to query about a specific topic, person, or event. You should ask targeted questions",
+            )
+        ]
         # Setup LLM and Agent
         llm = ChatOpenAI(model_name=self.openai_model, streaming=True)
         agent = initialize_agent(
